@@ -121,7 +121,6 @@ else:
     device = -1
 # device=1
 # print('device: ', device)
-torch.cuda.set_device(device)
 
 # ===Save Model and samples===
 save_root = 'save/{}/{}/{}_{}_lt-{}_sl{}_temp{}_T{}/'.format(time.strftime("%Y%m%d"),
@@ -228,7 +227,6 @@ def init_param(opt):
     tips = opt.tips
 
     # CUDA device
-    torch.cuda.set_device(device)
 
     # Save path
     save_root = 'save/{}/{}/{}_{}_lt-{}_sl{}_temp{}_T{}/'.format(time.strftime("%Y%m%d"),

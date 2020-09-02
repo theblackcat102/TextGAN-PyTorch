@@ -8,15 +8,17 @@
 # Copyrights (C) 2018. All Rights Reserved.
 
 import torch
+import os
 import torch.nn.functional as F
 import torch.optim as optim
 from tqdm import tqdm
-
+from time import time
 import config as cfg
 from instructor.real_data.instructor import BasicInstructor
 from models.RelGAN_D import RelGAN_D
 from models.RelGAN_G import RelGAN_G
 from utils.helpers import get_fixed_temperature, get_losses
+from tensorboardX import SummaryWriter
 
 
 class RelGANInstructor(BasicInstructor):
@@ -35,6 +37,12 @@ class RelGANInstructor(BasicInstructor):
         self.gen_adv_opt = optim.Adam(self.gen.parameters(), lr=cfg.gen_adv_lr)
         self.dis_opt = optim.Adam(self.dis.parameters(), lr=cfg.dis_lr)
 
+        os.makedirs(cfg.log_filename.replace('.txt', ''), exist_ok=True)
+
+        self.logger = SummaryWriter(
+            cfg.log_filename.replace('.txt', '')
+        )
+
     def _run(self):
         # ===PRE-TRAINING (GENERATOR)===
         if not cfg.gen_pretrain:
@@ -46,10 +54,13 @@ class RelGANInstructor(BasicInstructor):
 
         # # ===ADVERSARIAL TRAINING===
         self.log.info('Starting Adversarial Training...')
-        progress = tqdm(range(cfg.ADV_train_epoch))
+
+        progress = tqdm(range(cfg.ADV_train_epoch), dynamic_ncols=True)
+
         for adv_epoch in progress:
             self.sig.update()
             if self.sig.adv_sig:
+                start = time()
                 g_loss = self.adv_train_generator(cfg.ADV_g_step)  # Generator
                 d_loss = self.adv_train_discriminator(cfg.ADV_d_step)  # Discriminator
                 self.update_temperature(adv_epoch, cfg.ADV_train_epoch)  # update temperature
@@ -59,8 +70,19 @@ class RelGANInstructor(BasicInstructor):
 
                 # TEST
                 if adv_epoch % cfg.adv_log_step == 0:
-                    self.log.info('[ADV] epoch %d: g_loss: %.4f, d_loss: %.4f, %s' % (
-                        adv_epoch, g_loss, d_loss, self.cal_metrics(fmt_str=True)))
+                    metrics = self.cal_metrics(fmt_str=False)
+                    for key, value in metrics.items():
+                        if isinstance(value, list):
+                            for idx, v in enumerate(value):
+                               self.logger.add_scalar('pretrain/'+key+'/'+str(idx), v, adv_epoch)
+                        else:
+                            self.logger.add_scalar('pretrain/'+key, value, adv_epoch)
+
+                    self.logger.add_scalar('train/d_loss', float(d_loss), adv_epoch)
+                    self.logger.add_scalar('train/g_loss', float(g_loss), adv_epoch)
+                    self.logger.add_scalar('train/temperature', self.gen.temperature, adv_epoch)
+                    self.log.info('[ADV] epoch %d: g_loss: %.4f, d_loss: %.4f' % (
+                        adv_epoch, g_loss, d_loss ))
 
                     if cfg.if_save and not cfg.if_test:
                         self._save('ADV', adv_epoch)
@@ -87,8 +109,17 @@ class RelGANInstructor(BasicInstructor):
 
                 # ===Test===
                 if epoch % cfg.pre_log_step == 0 or epoch == epochs - 1:
-                    self.log.info('[MLE-GEN] epoch %d : pre_loss = %.4f, %s' % (
-                        epoch, pre_loss, self.cal_metrics(fmt_str=True)))
+                    metrics = self.cal_metrics(fmt_str=False)
+                    for key, value in metrics.items():
+                        if isinstance(value, list):
+                            for idx, v in enumerate(value):
+                               self.logger.add_scalar('pretrain/'+key+'/'+str(idx), v, epoch)
+                        else:
+                            self.logger.add_scalar('pretrain/'+key, value, epoch)
+
+                    self.logger.add_scalar('pretrain/loss', pre_loss, epoch)
+                    self.log.info('[MLE-GEN] epoch %d : pre_loss = %.4f' % (
+                        epoch, pre_loss ))
 
                     if cfg.if_save and not cfg.if_test:
                         self._save('MLE', epoch)

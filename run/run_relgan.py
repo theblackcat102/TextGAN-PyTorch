@@ -39,7 +39,7 @@ oracle_pretrain = int(True)
 gen_pretrain = int(False)
 dis_pretrain = int(False)
 MLE_train_epoch = 150
-ADV_train_epoch = 3000
+ADV_train_epoch = 5001
 tips = 'RelGAN experiments'
 
 # ===Oracle or Real===
@@ -61,8 +61,8 @@ max_seq_len = 20
 gen_lr = 0.01
 gen_adv_lr = 1e-4
 dis_lr = 1e-4
-pre_log_step = 10
-adv_log_step = 20
+pre_log_step = 50
+adv_log_step = 500
 
 # ===Generator===
 ADV_g_step = 1

@@ -221,7 +221,7 @@ class BasicInstructor:
         if fmt_str:
             return ', '.join(['%s = %s' % (metric.get_name(), metric.get_score()) for metric in self.all_metrics])
         else:
-            return [metric.get_score() for metric in self.all_metrics]
+            return { str(metric.get_name()): metric.get_score() for metric in self.all_metrics}
 
     def cal_metrics_with_label(self, label_i):
         assert type(label_i) == int, 'missing label'
