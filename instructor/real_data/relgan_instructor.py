@@ -46,7 +46,7 @@ class RelGANInstructor(BasicInstructor):
         os.makedirs(cfg.log_filename.replace('.txt', ''), exist_ok=True)
 
         self.logger = SummaryWriter(
-            cfg.log_filename.replace('.txt', '')
+            cfg.log_filename.replace('.txt', '')+'_'+norm
         )
 
     def _run(self):

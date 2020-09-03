@@ -25,13 +25,19 @@ class GradNorm(nn.Module):
     def forward(self, x):
         x.requires_grad_(True)
         fx = self.main(x)
+        fx = fx.reshape(x.shape[0], -1)
+
         grad_x = torch.autograd.grad(
             fx, x, torch.ones_like(fx), create_graph=True,
             retain_graph=True)[0]
+
+
         grad_norm = torch.norm(grad_x.view(grad_x.size(0), -1), dim=1)
         grad_norm = grad_norm.view(-1, *[1 for _ in range(len(fx.shape) - 1)])
+
+
         fx = (fx / (grad_norm + torch.abs(fx)))
-        return fx
+        return fx.squeeze(1)
 
 class RelGAN_D(CNNDiscriminator):
     def __init__(self, embed_dim, max_seq_len, num_rep, vocab_size, padding_idx, norm='none',gpu=False, dropout=0.25):
@@ -42,6 +48,7 @@ class RelGAN_D(CNNDiscriminator):
         self.max_seq_len = max_seq_len
         self.feature_dim = sum(dis_num_filters)
         self.emb_dim_single = int(embed_dim / num_rep)
+        self.num_rep = num_rep
 
         self.embeddings = nn.Linear(vocab_size, embed_dim, bias=False)
         if norm == 'spectral':
