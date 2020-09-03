@@ -109,6 +109,7 @@ if __name__ == '__main__':
     opt.save_root = cfg.save_root
     opt.train_data = cfg.train_data
     opt.test_data = cfg.test_data
+    set_seed(opt.seed)
 
     # ===Dict===
     if cfg.if_real_data:
