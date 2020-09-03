@@ -45,7 +45,7 @@ tips = 'RelGAN experiments'
 # ===Oracle or Real===
 if_real_data = [int(False), int(True), int(True)]
 dataset = ['oracle', 'image_coco', 'emnlp_news']
-loss_type = 'rsgan'
+loss_type = 'hinge'
 vocab_size = [5000, 0, 0]
 temp_adpt = 'exp'
 temperature = [1, 100, 100]

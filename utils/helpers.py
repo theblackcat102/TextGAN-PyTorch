@@ -134,8 +134,8 @@ def get_losses(d_out_real, d_out_fake, loss_type='JS'):
         g_loss = torch.mean(-d_out_fake)
 
     elif loss_type == 'hinge':  # the hinge loss
-        d_loss_real = torch.mean(nn.ReLU(1.0 - d_out_real))
-        d_loss_fake = torch.mean(nn.ReLU(1.0 + d_out_fake))
+        d_loss_real = torch.mean(torch.relu(1.0 - d_out_real))
+        d_loss_fake = torch.mean(torch.relu(1.0 + d_out_fake))
         d_loss = d_loss_real + d_loss_fake
 
         g_loss = -torch.mean(d_out_fake)
