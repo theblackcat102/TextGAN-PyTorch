@@ -85,6 +85,10 @@ class RelGANInstructor(BasicInstructor):
 
                 progress.set_description(
                     'g_loss: %.4f, d_loss: %.4f, temperature: %.4f' % (g_loss, d_loss, self.gen.temperature))
+                if adv_epoch % 10 == 0:
+                    self.logger.add_scalar('train/d_loss', float(d_loss), adv_epoch)
+                    self.logger.add_scalar('train/g_loss', float(g_loss), adv_epoch)
+                    self.logger.add_scalar('train/temperature', self.gen.temperature, adv_epoch)
 
                 # TEST
                 if adv_epoch % cfg.adv_log_step == 0 and adv_epoch > 0:
@@ -96,9 +100,6 @@ class RelGANInstructor(BasicInstructor):
                         else:
                             self.logger.add_scalar('train/'+key, value, adv_epoch)
 
-                    self.logger.add_scalar('train/d_loss', float(d_loss), adv_epoch)
-                    self.logger.add_scalar('train/g_loss', float(g_loss), adv_epoch)
-                    self.logger.add_scalar('train/temperature', self.gen.temperature, adv_epoch)
                     self.logger.flush()
                     self.log.info('[ADV] epoch %d: g_loss: %.4f, d_loss: %.4f' % (
                         adv_epoch, g_loss, d_loss ))
