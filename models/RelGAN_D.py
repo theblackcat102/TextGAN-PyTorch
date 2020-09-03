@@ -10,15 +10,31 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn.utils.spectral_norm import spectral_norm
 
 from models.discriminator import CNNDiscriminator
 
 dis_filter_sizes = [2, 3, 4, 5]
 dis_num_filters = [300, 300, 300, 300]
 
+class GradNorm(nn.Module):
+    def __init__(self, *modules):
+        super(GradNorm, self).__init__()
+        self.main = nn.Sequential(*modules)
+
+    def forward(self, x):
+        x.requires_grad_(True)
+        fx = self.main(x)
+        grad_x = torch.autograd.grad(
+            fx, x, torch.ones_like(fx), create_graph=True,
+            retain_graph=True)[0]
+        grad_norm = torch.norm(grad_x.view(grad_x.size(0), -1), dim=1)
+        grad_norm = grad_norm.view(-1, *[1 for _ in range(len(fx.shape) - 1)])
+        fx = (fx / (grad_norm + torch.abs(fx)))
+        return fx
 
 class RelGAN_D(CNNDiscriminator):
-    def __init__(self, embed_dim, max_seq_len, num_rep, vocab_size, padding_idx, gpu=False, dropout=0.25):
+    def __init__(self, embed_dim, max_seq_len, num_rep, vocab_size, padding_idx, norm='none',gpu=False, dropout=0.25):
         super(RelGAN_D, self).__init__(embed_dim, vocab_size, dis_filter_sizes, dis_num_filters, padding_idx,
                                        gpu, dropout)
 
@@ -28,11 +44,17 @@ class RelGAN_D(CNNDiscriminator):
         self.emb_dim_single = int(embed_dim / num_rep)
 
         self.embeddings = nn.Linear(vocab_size, embed_dim, bias=False)
-
-        self.convs = nn.ModuleList([
-            nn.Conv2d(1, n, (f, self.emb_dim_single), stride=(1, self.emb_dim_single)) for (n, f) in
-            zip(dis_num_filters, dis_filter_sizes)
-        ])
+        if norm == 'spectral':
+            print('use spectral')
+            self.convs = nn.ModuleList([
+                spectral_norm(nn.Conv2d(1, n, (f, self.emb_dim_single), stride=(1, self.emb_dim_single))) for (n, f) in
+                zip(dis_num_filters, dis_filter_sizes)
+            ])        
+        else:
+            self.convs = nn.ModuleList([
+                nn.Conv2d(1, n, (f, self.emb_dim_single), stride=(1, self.emb_dim_single)) for (n, f) in
+                zip(dis_num_filters, dis_filter_sizes)
+            ])
 
         self.highway = nn.Linear(self.feature_dim, self.feature_dim)
         self.feature2out = nn.Linear(self.feature_dim, 100)

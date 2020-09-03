@@ -15,7 +15,7 @@ from tqdm import tqdm
 from time import time
 import config as cfg
 from instructor.real_data.instructor import BasicInstructor
-from models.RelGAN_D import RelGAN_D
+from models.RelGAN_D import RelGAN_D, GradNorm
 from models.RelGAN_G import RelGAN_G
 from utils.helpers import get_fixed_temperature, get_losses
 from tensorboardX import SummaryWriter
@@ -24,12 +24,18 @@ from tensorboardX import SummaryWriter
 class RelGANInstructor(BasicInstructor):
     def __init__(self, opt):
         super(RelGANInstructor, self).__init__(opt)
-
+        norm = opt.norm
+        assert norm in ['none', 'spectral', 'gradnorm']
         # generator, discriminator
+        print('norm ', norm)
         self.gen = RelGAN_G(cfg.mem_slots, cfg.num_heads, cfg.head_size, cfg.gen_embed_dim, cfg.gen_hidden_dim,
-                            cfg.vocab_size, cfg.max_seq_len, cfg.padding_idx, gpu=cfg.CUDA)
+                            cfg.vocab_size, cfg.max_seq_len, cfg.padding_idx,gpu=cfg.CUDA)
         self.dis = RelGAN_D(cfg.dis_embed_dim, cfg.max_seq_len, cfg.num_rep, cfg.vocab_size, cfg.padding_idx,
-                            gpu=cfg.CUDA)
+                            gpu=cfg.CUDA,norm=norm ).cuda()
+        if norm == 'gradnorm':
+            print('use gradnorm')
+            self.dis = GradNorm(self.dis).cuda()
+
         self.init_model()
 
         # Optimizer
@@ -69,18 +75,19 @@ class RelGANInstructor(BasicInstructor):
                     'g_loss: %.4f, d_loss: %.4f, temperature: %.4f' % (g_loss, d_loss, self.gen.temperature))
 
                 # TEST
-                if adv_epoch % cfg.adv_log_step == 0:
+                if adv_epoch % cfg.adv_log_step == 0 and adv_epoch > 0:
                     metrics = self.cal_metrics(fmt_str=False)
                     for key, value in metrics.items():
                         if isinstance(value, list):
                             for idx, v in enumerate(value):
-                               self.logger.add_scalar('pretrain/'+key+'/'+str(idx), v, adv_epoch)
+                               self.logger.add_scalar('train/'+key+'/'+str(idx), v, adv_epoch)
                         else:
-                            self.logger.add_scalar('pretrain/'+key, value, adv_epoch)
+                            self.logger.add_scalar('train/'+key, value, adv_epoch)
 
                     self.logger.add_scalar('train/d_loss', float(d_loss), adv_epoch)
                     self.logger.add_scalar('train/g_loss', float(g_loss), adv_epoch)
                     self.logger.add_scalar('train/temperature', self.gen.temperature, adv_epoch)
+                    self.logger.flush()
                     self.log.info('[ADV] epoch %d: g_loss: %.4f, d_loss: %.4f' % (
                         adv_epoch, g_loss, d_loss ))
 
@@ -108,7 +115,7 @@ class RelGANInstructor(BasicInstructor):
                 pre_loss = self.train_gen_epoch(self.gen, self.train_data.loader, self.mle_criterion, self.gen_opt)
 
                 # ===Test===
-                if epoch % cfg.pre_log_step == 0 or epoch == epochs - 1:
+                if (epoch % cfg.pre_log_step == 0 or epoch == epochs - 1) and epoch > 0:
                     metrics = self.cal_metrics(fmt_str=False)
                     for key, value in metrics.items():
                         if isinstance(value, list):
@@ -116,8 +123,8 @@ class RelGANInstructor(BasicInstructor):
                                self.logger.add_scalar('pretrain/'+key+'/'+str(idx), v, epoch)
                         else:
                             self.logger.add_scalar('pretrain/'+key, value, epoch)
-
                     self.logger.add_scalar('pretrain/loss', pre_loss, epoch)
+                    self.logger.flush()
                     self.log.info('[MLE-GEN] epoch %d : pre_loss = %.4f' % (
                         epoch, pre_loss ))
 
