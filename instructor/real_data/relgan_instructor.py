@@ -51,12 +51,24 @@ class RelGANInstructor(BasicInstructor):
 
     def _run(self):
         # ===PRE-TRAINING (GENERATOR)===
-        if not cfg.gen_pretrain:
+        if os.path.exists(cfg.pretrained_gen_path):
+            checkpoint = torch.load(cfg.pretrained_gen_path)
+            generation_weights = self.gen.state_dict()
+            match = True
+            for key, value in checkpoint.items():
+                if key not in generation_weights:
+                    match = False
+                elif generation_weights[key].shape != checkpoint[key].shape:
+                    match = False
+            if match:
+                self.gen.load_state_dict(checkpoint)
+                print('Load pre-trained generator: {}'.format(cfg.pretrained_gen_path))
+        elif not cfg.gen_pretrain:
             self.log.info('Starting Generator MLE Training...')
             self.pretrain_generator(cfg.MLE_train_epoch)
             if cfg.if_save and not cfg.if_test:
                 torch.save(self.gen.state_dict(), cfg.pretrained_gen_path)
-                print('Save pretrain_generator: {}'.format(cfg.pretrained_gen_path))
+                print('Save pre-trained generator: {}'.format(cfg.pretrained_gen_path))
 
         # # ===ADVERSARIAL TRAINING===
         self.log.info('Starting Adversarial Training...')
