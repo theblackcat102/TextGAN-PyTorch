@@ -12,7 +12,7 @@ import argparse
 
 import config as cfg
 from utils.text_process import load_test_dict, text_process
-
+from utils.data_utils import set_seed
 
 def program_config(parser):
     # Program
@@ -89,6 +89,7 @@ def program_config(parser):
     parser.add_argument('--signal_file', default=cfg.signal_file, type=str)
     parser.add_argument('--tips', default=cfg.tips, type=str)
 
+    parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--norm', default='none', type=str, choices=['none', 'spectral', 'gradnorm'])
 
     return parser
