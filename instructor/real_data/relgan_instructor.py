@@ -91,7 +91,7 @@ class RelGANInstructor(BasicInstructor):
                     self.logger.add_scalar('train/temperature', self.gen.temperature, adv_epoch)
 
                 # TEST
-                if adv_epoch % cfg.adv_log_step == 0 and adv_epoch > 0:
+                if adv_epoch % cfg.adv_log_step == 0:
                     metrics = self.cal_metrics(fmt_str=False)
                     for key, value in metrics.items():
                         if isinstance(value, list):
