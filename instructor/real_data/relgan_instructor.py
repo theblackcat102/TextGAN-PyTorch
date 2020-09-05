@@ -39,9 +39,9 @@ class RelGANInstructor(BasicInstructor):
         self.init_model()
 
         # Optimizer
-        self.gen_opt = optim.Adam(self.gen.parameters(), lr=cfg.gen_lr)
-        self.gen_adv_opt = optim.Adam(self.gen.parameters(), lr=cfg.gen_adv_lr)
-        self.dis_opt = optim.Adam(self.dis.parameters(), lr=cfg.dis_lr)
+        self.gen_opt = optim.Adam(self.gen.parameters(), lr=cfg.gen_lr, betas=(0.5, 0.999))
+        self.gen_adv_opt = optim.Adam(self.gen.parameters(), lr=cfg.gen_adv_lr, betas=(0.5, 0.999))
+        self.dis_opt = optim.Adam(self.dis.parameters(), lr=cfg.dis_lr, betas=(0.5, 0.999))
 
         os.makedirs(cfg.log_filename.replace('.txt', ''), exist_ok=True)
 

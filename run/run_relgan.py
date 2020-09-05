@@ -59,8 +59,8 @@ samples_num = 10000
 batch_size = 64
 max_seq_len = 20
 gen_lr = 0.01
-gen_adv_lr = 1e-4
-dis_lr = 1e-4
+gen_adv_lr = 2e-4
+dis_lr = 2e-4
 pre_log_step = 50
 adv_log_step = 500
 
