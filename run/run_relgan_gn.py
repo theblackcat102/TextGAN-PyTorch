@@ -41,7 +41,7 @@ oracle_pretrain = int(True)
 gen_pretrain = int(False)
 dis_pretrain = int(False)
 MLE_train_epoch = 150
-ADV_train_epoch = 40001
+ADV_train_epoch = 5001
 tips = 'RelGAN experiments'
 
 # ===Oracle or Real===
