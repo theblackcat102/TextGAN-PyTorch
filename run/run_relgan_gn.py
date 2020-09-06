@@ -39,13 +39,13 @@ oracle_pretrain = int(True)
 gen_pretrain = int(False)
 dis_pretrain = int(False)
 MLE_train_epoch = 150
-ADV_train_epoch = 10001
+ADV_train_epoch = 40001
 tips = 'RelGAN experiments'
 
 # ===Oracle or Real===
 if_real_data = [int(False), int(True), int(True)]
 dataset = ['oracle', 'image_coco', 'emnlp_news']
-loss_type = 'hinge'
+loss_type = 'rsgan'
 vocab_size = [5000, 0, 0]
 temp_adpt = 'exp'
 temperature = [1, 100, 100]
@@ -143,6 +143,8 @@ args = [
     '--use_self_bleu', use_self_bleu,
     '--use_ppl', use_ppl,
     '--norm', 'gradnorm',
+    '--name', 'gradnorm',
+
 ]
 
 args = list(map(str, args))

@@ -143,6 +143,7 @@ args = [
     '--use_self_bleu', use_self_bleu,
     '--use_ppl', use_ppl,
     '--seed', 3,
+    '--name', 'vanilla',
 ]
 
 args = list(map(str, args))

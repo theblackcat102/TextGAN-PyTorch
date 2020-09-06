@@ -95,6 +95,8 @@ dis_embed_dim = 64
 dis_hidden_dim = 64
 num_rep = 64  # RelGAN
 
+name = 'none'
+
 # ===log===
 log_time_str = strftime("%m%d_%H%M_%S", localtime())
 log_filename = strftime("log/log_%s" % log_time_str)
@@ -123,11 +125,11 @@ else:
 # print('device: ', device)
 
 # ===Save Model and samples===
-save_root = 'save/{}/{}/{}_{}_lt-{}_sl{}_temp{}_T{}/'.format(time.strftime("%Y%m%d"),
+save_root = 'save/{}/{}/{}_{}_lt-{}_sl{}_temp{}_T{}_{}/'.format(time.strftime("%Y%m%d"),
                                                              dataset, run_model, model_type,
                                                              loss_type, max_seq_len,
                                                              temperature,
-                                                             log_time_str)
+                                                             log_time_str, name)
 save_samples_root = save_root + 'samples/'
 save_model_root = save_root + 'models/'
 
@@ -159,7 +161,7 @@ def init_param(opt):
         signal_file, tips, save_samples_root, save_model_root, if_real_data, pretrained_gen_path, \
         pretrained_dis_path, pretrain_root, if_test, dataset, PRE_clas_epoch, oracle_samples_path, \
         pretrained_clas_path, gen_init, dis_init, multi_oracle_samples_path, k_label, cat_train_data, cat_test_data, \
-        use_nll_oracle, use_nll_gen, use_nll_div, use_bleu, use_self_bleu, use_clas_acc, use_ppl
+        use_nll_oracle, use_nll_gen, use_nll_div, use_bleu, use_self_bleu, use_clas_acc, use_ppl, name
 
     if_test = True if opt.if_test == 1 else False
     run_model = opt.run_model
@@ -170,6 +172,7 @@ def init_param(opt):
     if_real_data = True if opt.if_real_data == 1 else False
     CUDA = True if opt.cuda == 1 else False
     device = opt.device
+    name = opt.name
     data_shuffle = opt.shuffle
     gen_init = opt.gen_init
     dis_init = opt.dis_init
@@ -229,11 +232,11 @@ def init_param(opt):
     # CUDA device
 
     # Save path
-    save_root = 'save/{}/{}/{}_{}_lt-{}_sl{}_temp{}_T{}/'.format(time.strftime("%Y%m%d"),
+    save_root = 'save/{}/{}/{}_{}_lt-{}_sl{}_temp{}_T{}_{}/'.format(time.strftime("%Y%m%d"),
                                                                  dataset, run_model, model_type,
                                                                  loss_type, max_seq_len,
                                                                  temperature,
-                                                                 log_time_str)
+                                                                 log_time_str, name)
     save_samples_root = save_root + 'samples/'
     save_model_root = save_root + 'models/'
 

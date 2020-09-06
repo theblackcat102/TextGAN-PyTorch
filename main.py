@@ -90,6 +90,7 @@ def program_config(parser):
     parser.add_argument('--tips', default=cfg.tips, type=str)
 
     parser.add_argument('--seed', default=0, type=int)
+    parser.add_argument('--name', default='default', type=str)
     parser.add_argument('--norm', default='none', type=str, choices=['none', 'spectral', 'gradnorm'])
 
     return parser
@@ -108,6 +109,8 @@ if __name__ == '__main__':
     cfg.init_param(opt)
     opt.save_root = cfg.save_root
     opt.train_data = cfg.train_data
+    opt.name = cfg.name
+
     opt.test_data = cfg.test_data
     set_seed(opt.seed)
 

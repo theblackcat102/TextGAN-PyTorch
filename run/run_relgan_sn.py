@@ -144,6 +144,7 @@ args = [
     '--use_ppl', use_ppl,
     '--norm', 'spectral',
     '--seed', 3,
+    '--name', 'spectral',
 ]
 
 args = list(map(str, args))

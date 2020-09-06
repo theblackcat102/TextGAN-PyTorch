@@ -170,7 +170,7 @@ def padding_token(tokens):
 
 def write_tokens(filename, tokens):
     """Write word tokens to a local file (For Real data)"""
-    with open(filename, 'w') as fout:
+    with open(filename, 'a') as fout:
         for sent in tokens:
             fout.write(' '.join(sent))
             fout.write('\n')
