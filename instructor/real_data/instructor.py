@@ -259,7 +259,7 @@ class BasicInstructor:
             torch.save(self.gen.state_dict(), cfg.save_model_root + 'gen_{}_{:05d}.pt'.format(phase, epoch))
         save_sample_path = cfg.save_samples_root + 'samples_{}_{:05d}.txt'.format(phase, epoch)
 
-        for idx in range(1000//cfg.batch_size):
+        for idx in range(10000//cfg.batch_size):
             samples = self.gen.sample(cfg.batch_size, cfg.batch_size)
             write_tokens(save_sample_path, tensor_to_tokens(samples, self.idx2word_dict))
 
