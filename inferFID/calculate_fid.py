@@ -108,7 +108,7 @@ if __name__ == "__main__":
     else:
         mu, sigma = get_activation(opt.src)
         np.save(stats_cache, {'mean': mu, 'sigma': sigma})
-
+    print(opt.tgt)
     gen_mu, gen_sigma = get_activation(opt.tgt)
     fid_value = calculate_frechet_distance(mu, sigma, gen_mu, gen_sigma)
     print(fid_value)

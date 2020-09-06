@@ -11,7 +11,7 @@ import sys
 from subprocess import call
 
 import os
-
+seed = 0
 # Job id and gpu_id
 if len(sys.argv) > 2:
     job_id = int(sys.argv[1])
@@ -26,6 +26,9 @@ else:
     gpu_id = 0
     print('Missing argument: job_id and gpu_id. Use default job_id: {}, gpu_id: {}'.format(job_id, gpu_id))
 
+if len(sys.argv) > 3:
+    seed = int(sys.argv[3])
+
 # Executables
 executable = 'python'  # specify your own python interpreter path here
 rootdir = '../'
@@ -39,7 +42,7 @@ oracle_pretrain = int(True)
 gen_pretrain = int(False)
 dis_pretrain = int(False)
 MLE_train_epoch = 150
-ADV_train_epoch = 5001
+ADV_train_epoch =5001
 tips = 'RelGAN experiments'
 
 # ===Oracle or Real===
@@ -59,8 +62,8 @@ samples_num = 10000
 batch_size = 64
 max_seq_len = 20
 gen_lr = 0.01
-gen_adv_lr = 2e-4
-dis_lr = 2e-4
+gen_adv_lr = 1e-4
+dis_lr = 1e-4
 pre_log_step = 50
 adv_log_step = 500
 
@@ -142,8 +145,9 @@ args = [
     '--use_bleu', use_bleu,
     '--use_self_bleu', use_self_bleu,
     '--use_ppl', use_ppl,
-    '--seed', 3,
-    '--name', 'vanilla',
+    '--seed', seed,
+    '--name', 'vanilla-'+str(seed),
+
 ]
 
 args = list(map(str, args))

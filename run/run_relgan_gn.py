@@ -11,7 +11,7 @@ import sys
 from subprocess import call
 
 import os
-
+seed = 0
 # Job id and gpu_id
 if len(sys.argv) > 2:
     job_id = int(sys.argv[1])
@@ -25,6 +25,8 @@ else:
     job_id = 0
     gpu_id = 0
     print('Missing argument: job_id and gpu_id. Use default job_id: {}, gpu_id: {}'.format(job_id, gpu_id))
+if len(sys.argv) > 3:
+    seed = int(sys.argv[3])
 
 # Executables
 executable = 'python'  # specify your own python interpreter path here
@@ -143,8 +145,8 @@ args = [
     '--use_self_bleu', use_self_bleu,
     '--use_ppl', use_ppl,
     '--norm', 'gradnorm',
-    '--name', 'gradnorm',
-
+    '--seed', seed,
+    '--name', 'gradnorm-'+str(seed),
 ]
 
 args = list(map(str, args))

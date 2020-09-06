@@ -15,7 +15,7 @@ from torch.nn.utils.spectral_norm import spectral_norm
 from models.discriminator import CNNDiscriminator
 
 dis_filter_sizes = [2, 3, 4, 5]
-dis_num_filters = [200, 200, 200, 200]
+dis_num_filters = [300, 300, 300, 300]
 
 class GradNorm(nn.Module):
     def __init__(self, *modules):
@@ -60,9 +60,7 @@ class RelGAN_D(CNNDiscriminator):
         else:
             self.convs = nn.ModuleList([
                 nn.Sequential(
-                    nn.Conv2d(1, n//2, (f, self.emb_dim_single), stride=(1, self.emb_dim_single)),
-                    nn.LeakyReLU(0.1),
-                    nn.Conv2d(n//2, n, (f, self.emb_dim_single), stride=(1, self.emb_dim_single)),
+                    nn.Conv2d(1, n, (f, self.emb_dim_single), stride=(1, self.emb_dim_single)),
                 )
                      for (n, f) in
                 zip(dis_num_filters, dis_filter_sizes)
