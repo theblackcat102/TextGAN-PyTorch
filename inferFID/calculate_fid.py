@@ -1,9 +1,10 @@
 import nltk
-nltk.download('punkt')
+# nltk.download('punkt')
 from .models import InferSent
 import argparse
 import numpy as np
 import torch
+import os
 from scipy import linalg
 from torch.nn.functional import adaptive_avg_pool2d
 from tqdm import trange
@@ -99,9 +100,15 @@ if __name__ == "__main__":
     parser.add_argument('tgt', type=str, help='generated texts')
     opt = parser.parse_args()
 
-    stats_cache = opt.src+'.npz'
+    stats_cache = opt.src
+    if os.path.exists(stats_cache+'.npy'):
+        cache = np.load(stats_cache+'.npy').item()
+        mu = cache['mean']
+        sigma =  cache['sigma']
+    else:
+        mu, sigma = get_activation(opt.src)
+        np.save(stats_cache, {'mean': mu, 'sigma': sigma})
 
-    mu, sigma = get_activation(opt.src)
     gen_mu, gen_sigma = get_activation(opt.tgt)
     fid_value = calculate_frechet_distance(mu, sigma, gen_mu, gen_sigma)
     print(fid_value)
