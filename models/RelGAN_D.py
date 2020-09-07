@@ -17,6 +17,24 @@ from models.discriminator import CNNDiscriminator
 dis_filter_sizes = [2, 3, 4, 5]
 dis_num_filters = [300, 300, 300, 300]
 
+def cacl_gradient_penalty(net_D, real, fake):
+    t = torch.rand(real.size(0), 1, 1).to(real.device)
+    t = t.expand(real.size())
+
+    interpolates = t * real + (1 - t) * fake
+    interpolates.requires_grad_(True)
+    disc_interpolates = net_D(interpolates)
+    grad = torch.autograd.grad(
+        outputs=disc_interpolates, inputs=interpolates,
+        grad_outputs=torch.ones_like(disc_interpolates),
+        create_graph=True, retain_graph=True)[0]
+
+    grad_norm = torch.norm(torch.flatten(grad, start_dim=1), dim=1)
+    loss_gp = torch.mean((grad_norm - 1) ** 2)
+    return loss_gp
+
+
+
 class GradNorm(nn.Module):
     def __init__(self, *modules):
         super(GradNorm, self).__init__()
@@ -92,3 +110,5 @@ class RelGAN_D(CNNDiscriminator):
         logits = self.out2logits(pred).squeeze(1)  # [batch_size * num_rep]
 
         return logits
+
+    

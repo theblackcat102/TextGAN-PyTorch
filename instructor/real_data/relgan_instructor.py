@@ -15,7 +15,7 @@ from tqdm import tqdm
 from time import time
 import config as cfg
 from instructor.real_data.instructor import BasicInstructor
-from models.RelGAN_D import RelGAN_D, GradNorm
+from models.RelGAN_D import RelGAN_D, GradNorm, cacl_gradient_penalty
 from models.RelGAN_G import RelGAN_G
 from utils.helpers import get_fixed_temperature, get_losses
 from tensorboardX import SummaryWriter
@@ -25,9 +25,10 @@ class RelGANInstructor(BasicInstructor):
     def __init__(self, opt):
         super(RelGANInstructor, self).__init__(opt)
         norm = opt.norm
-        assert norm in ['none', 'spectral', 'gradnorm']
+        assert norm in ['none', 'spectral', 'gradnorm','gp']
         # generator, discriminator
         print('norm ', norm)
+        self.norm = norm
         self.gen = RelGAN_G(cfg.mem_slots, cfg.num_heads, cfg.head_size, cfg.gen_embed_dim, cfg.gen_hidden_dim,
                             cfg.vocab_size, cfg.max_seq_len, cfg.padding_idx,gpu=cfg.CUDA)
         self.dis = RelGAN_D(cfg.dis_embed_dim, cfg.max_seq_len, cfg.num_rep, cfg.vocab_size, cfg.padding_idx,
@@ -184,6 +185,9 @@ class RelGANInstructor(BasicInstructor):
             d_out_real = self.dis(real_samples)
             d_out_fake = self.dis(gen_samples)
             _, d_loss = get_losses(d_out_real, d_out_fake, cfg.loss_type)
+            if self.norm == 'gp':
+                gp_loss = cacl_gradient_penalty(self.dis, real_samples, gen_samples)
+                d_loss += gp_loss * 10
 
             self.optimize(self.dis_opt, d_loss, self.dis)
             total_loss += d_loss.item()

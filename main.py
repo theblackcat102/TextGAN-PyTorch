@@ -91,7 +91,7 @@ def program_config(parser):
 
     parser.add_argument('--seed', default=0, type=int)
     parser.add_argument('--name', default='default', type=str)
-    parser.add_argument('--norm', default='none', type=str, choices=['none', 'spectral', 'gradnorm'])
+    parser.add_argument('--norm', default='none', type=str, choices=['none', 'spectral', 'gradnorm', 'gp'])
 
     return parser
 
