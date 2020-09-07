@@ -10,7 +10,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
-
+from tqdm import tqdm
 import config as cfg
 from metrics.bleu import BLEU
 from metrics.clas_acc import ACC
@@ -94,7 +94,7 @@ class BasicInstructor:
 
     def train_gen_epoch(self, model, data_loader, criterion, optimizer):
         total_loss = 0
-        for i, data in enumerate(data_loader):
+        for data in tqdm(data_loader, dynamic_ncols=True):
             inp, target = data['input'], data['target']
             if cfg.CUDA:
                 inp, target = inp.cuda(), target.cuda()

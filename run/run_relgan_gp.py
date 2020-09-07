@@ -60,6 +60,10 @@ dis_init = 'uniform'
 samples_num = 10000
 batch_size = 64
 max_seq_len = 20
+if job_id == 1:
+    max_seq_len = 37
+elif job_id == 2:
+    max_seq_len = 51
 gen_lr = 0.01
 gen_adv_lr = 1e-4
 dis_lr = 1e-4
