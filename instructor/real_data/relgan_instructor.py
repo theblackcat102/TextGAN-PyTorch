@@ -111,7 +111,7 @@ class RelGANInstructor(BasicInstructor):
                         adv_epoch, g_loss, d_loss ))
 
                     if cfg.if_save and not cfg.if_test:
-                        self._save('ADV', adv_epoch)
+                        self._save('GEN', adv_epoch)
             else:
                 self.log.info('>>> Stop by adv_signal! Finishing adversarial training...')
                 progress.close()
